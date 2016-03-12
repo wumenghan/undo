@@ -7,7 +7,7 @@ $(document).ready(function(){
 	var colorYellow = "#ffcf33";
 	var colorBrown = "#986928";
 	var curColor = colorPurple;
-	
+	var curSize = "normal";
 
 	var drag_duration = 0;
 	var canvasDiv = document.getElementById("canvasDiv");
@@ -69,6 +69,7 @@ $(document).ready(function(){
 	var clickY = new Array();
 	var clickDrag = new Array();
 	var clickColor = new Array();
+	var clickSize = new Array();
 	var paint;
 
 	// for redo
@@ -76,12 +77,14 @@ $(document).ready(function(){
 	var r_clickY = new Array();
 	var r_clickDrag = new Array();
 	var r_clickColor = new Array();
+	var r_clickSize = new Array();
 	function addClick(x, y, dragging){
 
 	  	clickX.push(x);
 	  	clickY.push(y);
 	  	clickDrag.push(dragging);
 	  	clickColor.push(curColor);
+	  	clickSize.push(curSize);
 	}
 
 	function redraw(){
@@ -89,7 +92,7 @@ $(document).ready(function(){
 	  	
 	  	// context.strokeStyle = "#df4b26";
 	  	context.lineJoin = "round";
-	  	context.lineWidth = 5;
+	  	// context.lineWidth = 5;
 	  	for(var i=0; i < clickX.length; i++) {		
 	    	context.beginPath();
 	    if(clickDrag[i] && i){
@@ -101,11 +104,31 @@ $(document).ready(function(){
 	     context.lineTo(clickX[i], clickY[i]);
 	     context.closePath();
 	     context.strokeStyle = clickColor[i];
+	     context.lineWidth = size_to_radius(clickSize[i]);
 	     context.stroke();
 
 	  }
 	}
 
+	function size_to_radius(size){
+		switch (size) {
+				case "small":
+					return 2;
+					break;
+				case "normal":
+					return 5;
+					break;
+				case "large":
+					return 10;
+					break;
+				case "huge":
+					return 20;
+					break;
+				default:
+					break;
+				}
+
+	}
 
 	$("#undo").click(function() {
 		
@@ -169,6 +192,10 @@ $(document).ready(function(){
 		}
 	});
 
+	$(".size").click(function(e) {
+		var	size = $(this).val();
+		curSize = size;
+		});
 
 
 });
