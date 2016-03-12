@@ -7,7 +7,7 @@ $(document).ready(function(){
 	var colorYellow = "#ffcf33";
 	var colorBrown = "#986928";
 	var curColor = colorPurple;
-	var clickColor = new Array();
+	
 
 	var drag_duration = 0;
 	var canvasDiv = document.getElementById("canvasDiv");
@@ -30,6 +30,7 @@ $(document).ready(function(){
   		addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
  		redraw();
  		drag_duration = drag_duration + 1
+ 		//reset redo stack one new insert event trigger
  		redoStack = [];
  		console.log("down")
 	});
@@ -47,7 +48,7 @@ $(document).ready(function(){
 	$('#canvas').mouseup(function(e){
 		paint = false;
 		console.log(drag_duration);
-		undo_action = {drag_duration:drag_duration};
+		undo_action = {drag_duration:drag_duration, color:curColor};
 		undoStack.push(undo_action);
 		drag_duration = 0;
 		console.log("up")
@@ -55,7 +56,7 @@ $(document).ready(function(){
 
 	$('#canvas').mouseleave(function(e){
   		if(paint == true){
-  			undo_action = {drag_duration:drag_duration};
+  			undo_action = {drag_duration:drag_duration, color:curColor};
   			undoStack.push(undo_action);
   			console.log(drag_duration);
   		}
@@ -67,13 +68,14 @@ $(document).ready(function(){
 	var clickX = new Array();
 	var clickY = new Array();
 	var clickDrag = new Array();
+	var clickColor = new Array();
 	var paint;
 
 	// for redo
 	var r_clickX = new Array();
 	var r_clickY = new Array();
 	var r_clickDrag = new Array();
-
+	var r_clickColor = new Array();
 	function addClick(x, y, dragging){
 
 	  	clickX.push(x);
@@ -114,13 +116,16 @@ $(document).ready(function(){
 		if(typeof(redo_element) != "undefined" || undefined){
 			redoStack.push(redo_element);
 		}
-		
+		console.log(clickColor)
+		// undo the line
 		for (var i=0; i < last_click_event.drag_duration; i++){
 		
 			r_clickX.push(clickX.pop());
 			r_clickY.push(clickY.pop());
 			r_clickDrag.push(clickDrag.pop());
+			r_clickColor.push(clickColor.pop());
 		}
+
 
 		redraw();		
 		
@@ -135,16 +140,35 @@ $(document).ready(function(){
 		if(typeof(undo_element) != "undefined" || undefined){
 			undoStack.push(undo_element);
 		}
-
+		// redo the line
 		for (var j=0; j < redo_event.drag_duration; j++){
 
 			clickX.push(r_clickX.pop());
 			clickY.push(r_clickY.pop());
 			clickDrag.push(r_clickDrag.pop());
+			clickColor.push(r_clickColor.pop());
+
 		}
 		redraw();
 
 	});
+
+	$(".color").click(function(e) {
+		var color = $(this).val();
+		if(color == "Green"){
+			curColor = colorGreen;
+		}
+		else if (color == "Brown"){
+			curColor = colorBrown;
+		}
+		else if (color == "Yellow"){
+			curColor = colorYellow;
+		}
+		else if (color == "Purple"){
+			curColor = colorPurple;
+		}
+	});
+
 
 
 });
