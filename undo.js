@@ -1,13 +1,15 @@
 $(document).ready(function(){
 	var undoStack = [];
 	var redoStack = [];
-	
+	var actionStack = [];
+	var command;
 	var colorPurple = "#cb3594";
 	var colorGreen = "#659b41";
 	var colorYellow = "#ffcf33";
 	var colorBrown = "#986928";
 	var curColor = colorPurple;
 	var curSize = "normal";
+	var curTool = "crayon";
 
 	var drag_duration = 0;
 	var canvasDiv = document.getElementById("canvasDiv");
@@ -17,6 +19,19 @@ $(document).ready(function(){
 	canvas.setAttribute("id", "canvas");
 	canvas.setAttribute("style", "border:1px solid #000000;");
 	canvasDiv.appendChild(canvas);
+	
+	stackUpdate = function(e){
+		var html = "";
+		for(var i=0; i<actionStack.length; i++){
+			// html = html + "<p>" + actionStack[i] + "</p> ";
+			html = html + actionStack[i] + "<br>"
+		}
+		$("#stack").html(html);
+	}
+	canvas.addEventListener("mouseover", stackUpdate);
+	canvas.addEventListener("mousedown", stackUpdate);
+	canvas.addEventListener("mouseup", stackUpdate);
+
 	if(typeof G_vmlCanvasManager != 'undefined') {
 		canvas = G_vmlCanvasManager.initElement(canvas);
 	}
@@ -52,12 +67,28 @@ $(document).ready(function(){
 		undoStack.push(undo_action);
 		drag_duration = 0;
 		console.log("up")
+		if (curTool != "eraser"){
+			command = "Use " + curColor +" "+ curTool + " in size " + curSize + " to draw";
+		}
+		else{
+			command = "Erase";
+		}
+		// action_dict = {curColor:curColor, curSize:curSize, curTool:curTool}
+		actionStack.push(command);
 	});
 
 	$('#canvas').mouseleave(function(e){
   		if(paint == true){
   			undo_action = {drag_duration:drag_duration, color:curColor};
   			undoStack.push(undo_action);
+  			// action_dict = {curColor:curColor, curSize:curSize, curTool:curTool}
+  			if (curTool != "eraser"){
+				command = "Use " + curColor +" "+ curTool + " in size " + curSize + " to draw";
+			}
+			else{
+				command = "Erase";
+			}
+			actionStack.push(command);
   			console.log(drag_duration);
   		}
   		drag_duration = 0;
@@ -70,6 +101,7 @@ $(document).ready(function(){
 	var clickDrag = new Array();
 	var clickColor = new Array();
 	var clickSize = new Array();
+	var clickTool = new Array();
 	var paint;
 
 	// for redo
@@ -78,13 +110,23 @@ $(document).ready(function(){
 	var r_clickDrag = new Array();
 	var r_clickColor = new Array();
 	var r_clickSize = new Array();
+	var r_clickTool = new Array();
+
 	function addClick(x, y, dragging){
 
 	  	clickX.push(x);
 	  	clickY.push(y);
 	  	clickDrag.push(dragging);
-	  	clickColor.push(curColor);
+	  	if(curTool == "eraser"){
+	  		clickColor.push("white");
+	  	}
+	  	else{
+	  		clickColor.push(curColor);
+	  	}
 	  	clickSize.push(curSize);
+	  	clickTool.push(curTool);
+
+
 	}
 
 	function redraw(){
@@ -103,11 +145,19 @@ $(document).ready(function(){
 	     }
 	     context.lineTo(clickX[i], clickY[i]);
 	     context.closePath();
-	     context.strokeStyle = clickColor[i];
-	     context.lineWidth = size_to_radius(clickSize[i]);
+	     // context.strokeStyle = clickColor[i];
+	  	 if(clickTool[i] == "eraser"){
+	  	 	context.strokeStyle = "white";
+	  	 }
+	  	 else{
+	  	 	context.strokeStyle = clickColor[i];	
+	  	 }
+	  	 context.lineWidth = size_to_radius(clickSize[i]);
 	     context.stroke();
-
 	  }
+
+		
+
 	}
 
 	function size_to_radius(size){
@@ -147,9 +197,12 @@ $(document).ready(function(){
 			r_clickY.push(clickY.pop());
 			r_clickDrag.push(clickDrag.pop());
 			r_clickColor.push(clickColor.pop());
+			r_clickSize.push(clickSize.pop());
+			r_clickTool.push(clickTool.pop());
 		}
 
-
+		command = "undo";
+		actionStack.push(command);
 		redraw();		
 		
 	});
@@ -170,8 +223,12 @@ $(document).ready(function(){
 			clickY.push(r_clickY.pop());
 			clickDrag.push(r_clickDrag.pop());
 			clickColor.push(r_clickColor.pop());
+			clickSize.push(r_clickSize.pop());
+			clickTool.push(r_clickTool.pop());
 
 		}
+		command = "redo";
+		actionStack.push(command);
 		redraw();
 
 	});
@@ -190,12 +247,25 @@ $(document).ready(function(){
 		else if (color == "Purple"){
 			curColor = colorPurple;
 		}
+		$("#s_color").val(color);
+		command = "Select color " + color;
+		actionStack.push(command);
 	});
 
 	$(".size").click(function(e) {
 		var	size = $(this).val();
 		curSize = size;
-		});
+		$("#s_size").val(size);
+		command = "Select size " + size;
+		actionStack.push(command);
+	});
+		
 
-
+	$(".tool").click(function() {
+		var tool = $(this).val();
+		curTool = tool;
+		$("#s_tool").val(tool);
+		command = "Select tool " + tool;
+		actionStack.push(command);
+	});
 });
