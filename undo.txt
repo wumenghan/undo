@@ -1,20 +1,28 @@
 Strategy:
 
-A line or curve is formed by dots. 
+The basic unit of an object on the canvas is a dot. Each line , curve is formed by dots and the information (size, color, tool) of each dot is stored in different list with same index. 
 
-Each dot has the following attributes:
-	color, size ,tool
-and every dot is stored in a list, which means the basic unit on the canvas is 
-a dot. To group it into a object, I record the lenght of each action and stored it on
-the undo
 
-Use the action of mouse to define an object: 
-	mouse down, mouse up. => dot
-	mouse down, mouse move, mouse up. => curve or line.
-	mouse down, mouse move, mouse leave. => curve or line.
-Each action contains multiple dots, I store the length of
+To create an "line" or "curve" object. I record the # of dots for each action and store it on the undoStack.
 
-To differentiate dot, line and curve. I record the mumber of "dots" in each 
-I create a undoStack and redoStack to store the user's action on canvas.
+Here's how I define an action:
+	1. mouse down, mouse up => 1 dot.
+	2. mouse down, mouse move, mouse up => curve or line.
+	3. mouse down, mouse move, mouse leave => curve or line.
 
-In canvas, it 
+So here's how undoStack looks like [1,12,32,123, ...]
+
+I want to implement linear undo. 
+
+There are two buttons, undo and redo.
+When user clicks undo, it will pops the element and push it to redoStack. 
+When user clicks redo, it will pops the element and push it back to undoStack.
+Whenever there is an new action, I flush the redoStack.
+
+Here is the example how it works. 
+
+Action:
+			draw a line, draw a curve, undo,   redo,     draw a dot, undo,    draw a line
+redoStack   [12]	     [12,15]       [12]    [12,15]   [12,15,1]   [12,15]  [12,15,21]
+undoStack   []			 []			   [15]	   []		 []			 [1]	  []
+
