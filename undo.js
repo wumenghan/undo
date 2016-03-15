@@ -28,9 +28,6 @@ $(document).ready(function(){
 		}
 		$("#stack").html(html);
 	}
-	canvas.addEventListener("mouseover", stackUpdate);
-	canvas.addEventListener("mousedown", stackUpdate);
-	canvas.addEventListener("mouseup", stackUpdate);
 
 	if(typeof G_vmlCanvasManager != 'undefined') {
 		canvas = G_vmlCanvasManager.initElement(canvas);
@@ -62,7 +59,6 @@ $(document).ready(function(){
 
 	$('#canvas').mouseup(function(e){
 		paint = false;
-		console.log(drag_duration);
 		undo_action = {drag_duration:drag_duration, color:curColor};
 		undoStack.push(undo_action);
 		drag_duration = 0;
@@ -75,6 +71,7 @@ $(document).ready(function(){
 		}
 		// action_dict = {curColor:curColor, curSize:curSize, curTool:curTool}
 		actionStack.push(command);
+		stackUpdate();
 	});
 
 	$('#canvas').mouseleave(function(e){
@@ -89,6 +86,7 @@ $(document).ready(function(){
 				command = "Erase";
 			}
 			actionStack.push(command);
+			stackUpdate();
   			console.log(drag_duration);
   		}
   		drag_duration = 0;
@@ -203,6 +201,7 @@ $(document).ready(function(){
 
 		command = "undo";
 		actionStack.push(command);
+		stackUpdate();
 		redraw();		
 		
 	});
@@ -229,6 +228,7 @@ $(document).ready(function(){
 		}
 		command = "redo";
 		actionStack.push(command);
+		stackUpdate();
 		redraw();
 
 	});
@@ -250,6 +250,7 @@ $(document).ready(function(){
 		$("#s_color").val(color);
 		command = "Select color " + color;
 		actionStack.push(command);
+		stackUpdate();
 	});
 
 	$(".size").click(function(e) {
@@ -258,6 +259,7 @@ $(document).ready(function(){
 		$("#s_size").val(size);
 		command = "Select size " + size;
 		actionStack.push(command);
+		stackUpdate();
 	});
 		
 
@@ -267,5 +269,8 @@ $(document).ready(function(){
 		$("#s_tool").val(tool);
 		command = "Select tool " + tool;
 		actionStack.push(command);
+		stackUpdate();
 	});
+
+
 });
