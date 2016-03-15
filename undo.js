@@ -24,12 +24,13 @@ $(document).ready(function(){
 	canvasDiv.appendChild(canvas);
 	
 	stackUpdate = function(e){
+		// push new action to stack
 		var html = "";
 		for(var i=0; i<actionStack.length; i++){
-			// html = html + "<p>" + actionStack[i] + "</p> ";
 			html = html + actionStack[i] + "<br>"
 		}
 		$("#stack").html(html);
+		// scoll to the lastest action if overflow
 		var stack = document.getElementById("stack");
 		if (stack.scrollHeight > canvasHeigth){
 			stack.scrollTop = stack.scrollHeight;
@@ -101,7 +102,7 @@ $(document).ready(function(){
   		paint = false;
   		console.log("leave")
 	});
-	// fArray or undo
+	// Array or undo
 	var clickX = new Array();
 	var clickY = new Array();
 	var clickDrag = new Array();
