@@ -13,13 +13,11 @@
     <script type="text/javascript">
     	 drawingApp.init();
 	</script> -->
-  
-      <div class="function_display" style="flex:1; margin-left:10px;">
-        Selected color:<input type="text" id="s_color" style="border:hidden"><br>
-        Selected size:<input type="text" id="s_size" style="border:hidden"><br>
-        Selected tool:<input type="text" id="s_tool" style="border:hidden">
 
+    <div id="stack" style="flex:1 ;margin-left:10px; overflow-y:scroll; height: 500px;">
+        
       </div>
+      
     </div>
     <div class="control_panel" style="display: flex"> 
       <div id="buttons" style="flex:initial;">
@@ -40,9 +38,13 @@
         <input type="button" class="tool" value="marker">
         <input type="button" class="tool" value="eraser">
       </div>
-      <div id="stack" style="flex:1">
-        
+      <div class="function_display" style="flex:1; margin-left:10px;">
+        Selected color:<input type="text" id="s_color" style="border:hidden"><br>
+        Selected size:<input type="text" id="s_size" style="border:hidden"><br>
+        Selected tool:<input type="text" id="s_tool" style="border:hidden">
+
       </div>
+      
     </div>
   </body>
 </html>

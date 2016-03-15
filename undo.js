@@ -10,12 +10,15 @@ $(document).ready(function(){
 	var curColor = colorPurple;
 	var curSize = "normal";
 	var curTool = "crayon";
-
+	var canvasHeigth = 500;
+	var canvasWidth = 500;
 	var drag_duration = 0;
+	
+	// initialize canvas object in html.
 	var canvasDiv = document.getElementById("canvasDiv");
 	canvas = document.createElement("canvas");
-	canvas.setAttribute("width", 500);
-	canvas.setAttribute("height", 500);
+	canvas.setAttribute("width", canvasHeigth);
+	canvas.setAttribute("height", canvasWidth);
 	canvas.setAttribute("id", "canvas");
 	canvas.setAttribute("style", "border:1px solid #000000;");
 	canvasDiv.appendChild(canvas);
@@ -27,6 +30,10 @@ $(document).ready(function(){
 			html = html + actionStack[i] + "<br>"
 		}
 		$("#stack").html(html);
+		var stack = document.getElementById("stack");
+		if (stack.scrollHeight > canvasHeigth){
+			stack.scrollTop = stack.scrollHeight;
+		}
 	}
 
 	if(typeof G_vmlCanvasManager != 'undefined') {
@@ -34,6 +41,7 @@ $(document).ready(function(){
 	}
 	context = canvas.getContext("2d");
 
+	// 4 events on canvas, mousedown, mousemove, mouseup, mouseleave.
 	$('#canvas').mousedown(function(e){
   		var mouseX = e.pageX - this.offsetLeft;
   		var mouseY = e.pageY - this.offsetTop;
@@ -46,7 +54,7 @@ $(document).ready(function(){
  		redoStack = [];
  		console.log("down")
 	});
-	// record length of drag when mousdown
+	
 	
 	$('#canvas').mousemove(function(e){
   		if(paint){
@@ -64,7 +72,7 @@ $(document).ready(function(){
 		drag_duration = 0;
 		console.log("up")
 		if (curTool != "eraser"){
-			command = "Use " + curColor +" "+ curTool + " in size " + curSize + " to draw";
+			command = "Use " + rgb_to_color(curColor) +" "+ curTool + " in size " + curSize + " to draw";
 		}
 		else{
 			command = "Erase";
@@ -80,7 +88,7 @@ $(document).ready(function(){
   			undoStack.push(undo_action);
   			// action_dict = {curColor:curColor, curSize:curSize, curTool:curTool}
   			if (curTool != "eraser"){
-				command = "Use " + curColor +" "+ curTool + " in size " + curSize + " to draw";
+				command = "Use " + rgb_to_color(curColor) +" "+ curTool + " in size " + curSize + " to draw";
 			}
 			else{
 				command = "Erase";
@@ -93,7 +101,7 @@ $(document).ready(function(){
   		paint = false;
   		console.log("leave")
 	});
-
+	// fArray or undo
 	var clickX = new Array();
 	var clickY = new Array();
 	var clickDrag = new Array();
@@ -102,7 +110,7 @@ $(document).ready(function(){
 	var clickTool = new Array();
 	var paint;
 
-	// for redo
+	// Array for redo
 	var r_clickX = new Array();
 	var r_clickY = new Array();
 	var r_clickDrag = new Array();
@@ -127,12 +135,11 @@ $(document).ready(function(){
 
 	}
 
+
 	function redraw(){
+
 	  	context.clearRect(0, 0, context.canvas.width, context.canvas.height); // Clears the canvas
-	  	
-	  	// context.strokeStyle = "#df4b26";
 	  	context.lineJoin = "round";
-	  	// context.lineWidth = 5;
 	  	for(var i=0; i < clickX.length; i++) {		
 	    	context.beginPath();
 	    if(clickDrag[i] && i){
@@ -150,14 +157,20 @@ $(document).ready(function(){
 	  	 else{
 	  	 	context.strokeStyle = clickColor[i];	
 	  	 }
+	  	 
 	  	 context.lineWidth = size_to_radius(clickSize[i]);
 	     context.stroke();
 	  }
-
-		
+	  // different tool
+	  if (curTool == "crayon"){
+	  	 	context.globalAlpha = 0.4;
+	  }
+	  else{
+	  		context.globalAlpha = 1;
+		}
 
 	}
-
+	// translate size to radius
 	function size_to_radius(size){
 		switch (size) {
 				case "small":
@@ -175,12 +188,29 @@ $(document).ready(function(){
 				default:
 					break;
 				}
+	}
+	// translate rgb to color
+	function rgb_to_color(rgb) {
+		switch(rgb) {
+			case "#cb3594":
+				return "Purple";
+				break;
+			case "#659b41":
+				return "Green";
+				break;
+			case "#ffcf33":
+				return "Yellow";
+				break;
+			case "#986928":
+				return "Brown";
+				break;
+		}
 
 	}
-
+	// button undo
+	// pop object in undo stack and push to redo stack
 	$("#undo").click(function() {
 		
-		if (undoStack.length == 0){alert("no undo")}		
 		last_click_event = undoStack[undoStack.length-1];
 		var redo_element = undoStack.pop();
 		
@@ -188,43 +218,48 @@ $(document).ready(function(){
 			redoStack.push(redo_element);
 		}
 		console.log(clickColor)
+		if (undoStack.length == 0){alert("no undo")}	
+		else{
 		// undo the line
-		for (var i=0; i < last_click_event.drag_duration; i++){
-		
-			r_clickX.push(clickX.pop());
-			r_clickY.push(clickY.pop());
-			r_clickDrag.push(clickDrag.pop());
-			r_clickColor.push(clickColor.pop());
-			r_clickSize.push(clickSize.pop());
-			r_clickTool.push(clickTool.pop());
+			for (var i=0; i < last_click_event.drag_duration; i++){
+			
+				r_clickX.push(clickX.pop());
+				r_clickY.push(clickY.pop());
+				r_clickDrag.push(clickDrag.pop());
+				r_clickColor.push(clickColor.pop());
+				r_clickSize.push(clickSize.pop());
+				r_clickTool.push(clickTool.pop());
+			}
 		}
-
 		command = "undo";
 		actionStack.push(command);
 		stackUpdate();
 		redraw();		
 		
 	});
-
+	// button redo
+	// pop object in redo stack and push to undo stack
 	$("#redo").click(function() {
-
-		if (redoStack.length == 0){alert("no redo")}
+		
 		redo_event = redoStack[redoStack.length-1];
 		var undo_element = redoStack.pop();
 
 		if(typeof(undo_element) != "undefined" || undefined){
 			undoStack.push(undo_element);
 		}
+		if (redoStack.length == 0){alert("no redo")}
+		else{
 		// redo the line
-		for (var j=0; j < redo_event.drag_duration; j++){
+			for (var j=0; j < redo_event.drag_duration; j++){
 
-			clickX.push(r_clickX.pop());
-			clickY.push(r_clickY.pop());
-			clickDrag.push(r_clickDrag.pop());
-			clickColor.push(r_clickColor.pop());
-			clickSize.push(r_clickSize.pop());
-			clickTool.push(r_clickTool.pop());
+				clickX.push(r_clickX.pop());
+				clickY.push(r_clickY.pop());
+				clickDrag.push(r_clickDrag.pop());
+				clickColor.push(r_clickColor.pop());
+				clickSize.push(r_clickSize.pop());
+				clickTool.push(r_clickTool.pop());
 
+			}
 		}
 		command = "redo";
 		actionStack.push(command);
@@ -233,6 +268,7 @@ $(document).ready(function(){
 
 	});
 
+	// button color
 	$(".color").click(function(e) {
 		var color = $(this).val();
 		if(color == "Green"){
@@ -253,6 +289,7 @@ $(document).ready(function(){
 		stackUpdate();
 	});
 
+	// button size
 	$(".size").click(function(e) {
 		var	size = $(this).val();
 		curSize = size;
@@ -262,7 +299,7 @@ $(document).ready(function(){
 		stackUpdate();
 	});
 		
-
+	// button tool
 	$(".tool").click(function() {
 		var tool = $(this).val();
 		curTool = tool;
@@ -272,5 +309,10 @@ $(document).ready(function(){
 		stackUpdate();
 	});
 
+	// initialize selected color, size, tool
+	var initialize_id = {"s_color":rgb_to_color(curColor), "s_size":curSize, "s_tool":curTool};
+	$.each(initialize_id, function(key, value){
+		$("#"+key).val(value);
+	});
 
 });
