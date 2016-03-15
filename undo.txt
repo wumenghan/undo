@@ -22,7 +22,7 @@ Whenever there is an new action, I flush the redoStack.
 Here is the example how it works. 
 
 Action:
-			draw a line, draw a curve, undo,   redo,     draw a dot, undo,    draw a line
-redoStack   [12]	     [12,15]       [12]    [12,15]   [12,15,1]   [12,15]  [12,15,21]
-undoStack   []			 []			   [15]	   []		 []			 [1]	  []
+	  draw a line, draw a curve, undo,   redo,     draw a dot, undo,    draw a line
+redoStack    [12]	     [12,15]           [12]      [12,15]   [12,15,1]   [12,15]  [12,15,21]
+undoStack   [ ]	     [ ]                   [15]	    [ ]	 [ ]	 [1]         [ ]
 
